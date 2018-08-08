@@ -19,25 +19,23 @@
 			...
 			org.springframework.beans.BeanWrapperImpl.BeanPropertyHandler.setValue(Object, Object)
 @Configuration
-解析@Configuration使用org.springframework.context.annotation.ConfigurationClassPostProcessor后置处理器
-org.springframework.context.annotation.ConfigurationClassPostProcessor.processConfigBeanDefinitions(BeanDefinitionRegistry)
-org.springframework.context.annotation.ConfigurationClassParser.parse(Set<BeanDefinitionHolder>)
-org.springframework.context.annotation.ConfigurationClassParser.parse(AnnotationMetadata, String)
-org.springframework.context.annotation.ConfigurationClassParser.processConfigurationClass(ConfigurationClass)
-解析@Configuration注解的类org.springframework.context.annotation.ConfigurationClassParser.doProcessConfigurationClass(ConfigurationClass, SourceClass)
-	org.springframework.context.annotation.ConfigurationClassParser.processPropertySource(AnnotationAttributes)
-	处理@PropertySource，先由Environment解析其中的变量值(${...})，String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
-	然后由ResourceLoader加载一个资源Resource，
-	所加载的资源Resource被PropertySourceFactory封装为一个PropertySource被添加到环境中((ConfigurableEnvironment) this.environment).getPropertySources().addLast(propertySource)
-
-	org.springframework.context.annotation.ComponentScanAnnotationParser.parse(AnnotationAttributes, String)
-	处理@ComponentScan注解，解析基本信息并设置到org.springframework.context.annotation.ClassPathBeanDefinitionScanner
-		org.springframework.context.annotation.ClassPathBeanDefinitionScanner.doScan(String...)完成扫描加载工作
-
-	org.springframework.context.annotation.ConfigurationClassParser.processImports(ConfigurationClass, SourceClass, Collection<SourceClass>, boolean)
-	处理@Import注解
-		org.springframework.context.annotation.ConfigurationClassParser.processImports(ConfigurationClass, SourceClass, Collection<SourceClass>, boolean)
-		先判断类是何种类型(ImportSelector/ImportBeanDefinitionRegistrar/普通类)再根据对应策略处理
+	org.springframework.context.annotation.ConfigurationClassPostProcessor后置处理器
+	org.springframework.context.annotation.ConfigurationClassPostProcessor.processConfigBeanDefinitions(BeanDefinitionRegistry)
+		org.springframework.context.annotation.ConfigurationClassParser.parse(Set<BeanDefinitionHolder>)
+			org.springframework.context.annotation.ConfigurationClassParser.parse(AnnotationMetadata, String)
+				org.springframework.context.annotation.ConfigurationClassParser.processConfigurationClass(ConfigurationClass)
+					org.springframework.context.annotation.ConfigurationClassParser.doProcessConfigurationClass(ConfigurationClass, SourceClass)
+						org.springframework.context.annotation.ConfigurationClassParser.processPropertySource(AnnotationAttributes)
+							处理@PropertySource，先由Environment解析其中的变量值(${...})，String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
+							然后由ResourceLoader加载一个资源Resource，
+							所加载的资源Resource被PropertySourceFactory封装为一个PropertySource被添加到环境中((ConfigurableEnvironment) this.environment).getPropertySources().addLast(propertySource)
+					org.springframework.context.annotation.ComponentScanAnnotationParser.parse(AnnotationAttributes, String)
+						处理@ComponentScan注解，解析基本信息并设置到org.springframework.context.annotation.ClassPathBeanDefinitionScanner
+					org.springframework.context.annotation.ClassPathBeanDefinitionScanner.doScan(String...)完成扫描加载工作
+					org.springframework.context.annotation.ConfigurationClassParser.processImports(ConfigurationClass, SourceClass, Collection<SourceClass>, boolean)
+						处理@Import注解
+					org.springframework.context.annotation.ConfigurationClassParser.processImports(ConfigurationClass, SourceClass, Collection<SourceClass>, boolean)
+						先判断类是何种类型(ImportSelector/ImportBeanDefinitionRegistrar/普通类)再根据对应策略处理
 @SpringBootApplication
 	此注解等价于@Configuration/@EnableAutoConfiguration/@ComponentScan
 	@SpringBootConfiguration 相当于是一个Configuration配置类
