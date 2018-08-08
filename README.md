@@ -36,9 +36,55 @@ org.springframework.boot.SpringApplication.run(Xxx.class, args) 启动
 		3. 通过SpringFactories加载org.springframework.context.ApplicationListener的key的值并实例化添加到SpringApplication的listeners集合当中
 		4. 获取启动类(即持有main方法的类); StackTraceElement[] stackTrace = new RuntimeException().getStackTrace(); 遍历比较main方法的类
 	org.springframework.boot.SpringApplication.run(String...) 创建并刷新一个Spring容器(SpringApplication)
+		开启一个StopWatch记录运行时间以及任务运行时间等
+		初始化一个SpringApplicationRunListeners类(其通过SpringFactories机制加载了key为org.springframework.boot.SpringApplicationRunListener的类并设置到了其listeners属性当中)来作为一个初始的事件监听组合类，便于统一管理(启动、销毁、发布时间等)
+		创建一个ConfigurableEnvironment(设置profile、如果是web环境将转换environment为标准环境对象)并执行SpringApplicationRunListener#environmentPrepared(Environment)方法(TODO 哪些执行了什么内容)
+		创建SpringIOC如果是web环境则创建org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext，否则是AnnotationConfigAppliactionContext(两个类都初始化了AnnotatedBeanDefinitionReader与ClassPathBeanDefinitionScanner)
+		org.springframework.boot.SpringApplication.prepareContext(ConfigurableApplicationContext, ConfigurableEnvironment, SpringApplicationRunListeners, ApplicationArguments, Banner) 上下文准备工作; 前面只是创建
+			设置环境 context.setEnvironment(environment);
+			postProcessApplicationContext(context); 设置beanName生成器、设置资源加载器
+			applyInitializers(context); 调用initializers集合中元素的initialize方法进行元素初始化 (TODO 哪些执行了什么内容)
+			listeners.contextPrepared(context); 上下文准备监听; 监听器做准备 (TODO 哪些执行了什么内容)
+			注册springApplicationArguments、springBootBanner
+			load(context, sources.toArray(new Object[sources.size()])); 将启动类注册到SpringIOC中
+				封装一个BeanDefinitionLoader去解析启动类  *******************重点*****************
+					org.springframework.boot.BeanDefinitionLoader.load(Object)
+						org.springframework.boot.BeanDefinitionLoader.load(Class<?>)
+							org.springframework.context.annotation.AnnotatedBeanDefinitionReader.registerBean(Class<?>, String, Class<? extends Annotation>...)
+								org.springframework.beans.factory.support.BeanDefinitionReaderUtils.registerBeanDefinition(BeanDefinitionHolder, BeanDefinitionRegistry)
+			listeners.contextLoaded(context); 上下文加载完成监听; 监听器做准备 (TODO 哪些执行了什么内容)
+		refreshContext(context); 刷新容器; 来到我们熟悉的((AbstractApplicationContext) applicationContext).refresh(); 完成一些列的beanPostProcessor/Bean的解析与创建并发布事件
+		afterRefresh(context, applicationArguments); 触发容器中的ApplicationRunner/CommandLineRunner
+		listeners.finished(context, null); 监听器结束方法触发
+		stopWatch.stop(); 统计信息
 ```
 
 ```Java
+spring-boot-xx.jar
+# Run Listeners
+org.springframework.boot.SpringApplicationRunListener=\
+org.springframework.boot.context.event.EventPublishingRunListener
+
+# Application Context Initializers
+org.springframework.context.ApplicationContextInitializer=\
+org.springframework.boot.context.ConfigurationWarningsApplicationContextInitializer,\
+org.springframework.boot.context.ContextIdApplicationContextInitializer,\
+org.springframework.boot.context.config.DelegatingApplicationContextInitializer,\
+org.springframework.boot.context.web.ServerPortInfoApplicationContextInitializer
+
+# Application Listeners
+org.springframework.context.ApplicationListener=\
+org.springframework.boot.ClearCachesApplicationListener,\
+org.springframework.boot.builder.ParentContextCloserApplicationListener,\
+org.springframework.boot.context.FileEncodingApplicationListener,\
+org.springframework.boot.context.config.AnsiOutputApplicationListener,\
+org.springframework.boot.context.config.ConfigFileApplicationListener,\
+org.springframework.boot.context.config.DelegatingApplicationListener,\
+org.springframework.boot.liquibase.LiquibaseServiceLocatorApplicationListener,\
+org.springframework.boot.logging.ClasspathLoggingApplicationListener,\
+org.springframework.boot.logging.LoggingApplicationListener
+
+spring-boot-autoconfigure-xx.jar
 # Initializers
 org.springframework.context.ApplicationContextInitializer=\
 org.springframework.boot.autoconfigure.SharedMetadataReaderFactoryContextInitializer,\
@@ -142,4 +188,17 @@ org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration,\
 org.springframework.boot.autoconfigure.websocket.WebSocketAutoConfiguration,\
 org.springframework.boot.autoconfigure.websocket.WebSocketMessagingAutoConfiguration,\
 org.springframework.boot.autoconfigure.webservices.WebServicesAutoConfiguration
+
+spring-cloud-context-xx.jar
+# AutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration,\
+org.springframework.cloud.autoconfigure.RefreshAutoConfiguration,\
+org.springframework.cloud.autoconfigure.RefreshEndpointAutoConfiguration,\
+org.springframework.cloud.autoconfigure.LifecycleMvcEndpointAutoConfiguration
+
+# Application Listeners
+org.springframework.context.ApplicationListener=\
+org.springframework.cloud.bootstrap.BootstrapApplicationListener,\
+org.springframework.cloud.context.restart.RestartListener
 ```
