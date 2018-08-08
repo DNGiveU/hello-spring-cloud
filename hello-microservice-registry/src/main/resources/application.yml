@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: registry
+server:
+  port: 8050
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    # 表明是否将自己注册到其它的注册中心当中以便被发现
+    register-with-eureka: false
+    # 表明是否需要从注册中心获取注册信息列表 
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+      
+# 参考文档：http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#_standalone_mode
+# 参考文档：http://my.oschina.net/buwei/blog/618756
