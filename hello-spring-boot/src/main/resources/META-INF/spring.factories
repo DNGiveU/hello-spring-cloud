@@ -1,0 +1,12 @@
+# 自定义spring.factories
+# PropertySource Loaders
+org.springframework.boot.env.PropertySourceLoader=org.hello.boot.bean.MyPropertySourceLoader
+
+# Initializers
+org.springframework.context.ApplicationContextInitializer=org.hello.boot.bean.MyApplicationContextInitializer
+
+# Application Listeners
+org.springframework.context.ApplicationListener=org.hello.boot.bean.MyApplicationListener
+
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=org.hello.boot.bean.MyAutoConfiguration
