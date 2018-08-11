@@ -101,7 +101,7 @@ ConfigFileApplicationListener-ApplicationEnvironmentPreparedEvent/ApplicationPre
 			org.springframework.boot.context.config.ConfigFileApplicationListener.addPropertySources(ConfigurableEnvironment, ResourceLoader)
 				注册一个随机数属性源到环境中new RandomValuePropertySource(RANDOM_PROPERTY_SOURCE_NAME="random")
 				new Loader(environment, resourceLoader).load();
-				加载名为applicatioin的文件, 后缀名策略根据SpringFactories加载的org.springframework.boot.env.PropertySourceLoader决定 (PropertiesPropertySourceLoader/YamlPropertySourceLoader都加载); 即加载application.yaml/application.yml/application.properties
+				加载名为applicatioin的文件, 后缀名策略根据SpringFactories加载的org.springframework.boot.env.PropertySourceLoader决定 (PropertiesPropertySourceLoader/YamlPropertySourceLoader都加载); 即加载application.yaml/application.yml/application.properties/application.xml
 			org.springframework.boot.context.config.ConfigFileApplicationListener.configureIgnoreBeanInfo(ConfigurableEnvironment) 检测spring.beaninfo.ignore属性以及是否需要设置到System属性中
 			org.springframework.boot.context.config.ConfigFileApplicationListener.bindToSpringApplication(ConfigurableEnvironment, SpringApplication) 从环境中绑定spring.main到SpringApplication中
 		SpringApplicationJsonEnvironmentPostProcessor

@@ -54,5 +54,6 @@
 	<modules>
 		<module>hello-microservice-registry</module>
     <module>hello-spring-boot</module>
+    <module>hello-spring-boot-web</module>
   </modules>
 </project>

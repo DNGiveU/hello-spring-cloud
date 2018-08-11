@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: hello-spring-boot-web
+server:
+  port: 8090
