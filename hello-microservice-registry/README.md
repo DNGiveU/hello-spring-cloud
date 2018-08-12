@@ -25,6 +25,33 @@
 			indicate eureka dashboard info. for example The path to the Eureka dashboard
 		加载了spring-cloud-netflix-eureka-server下的eureka/server.properties文件
 			主要indicate http unforce encoding. spring.http.encoding.force=false
+			
+配置先后顺序:
+org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration [spring.factories]
+	<- EurekaClientConfigBean (处理eureka.instance属性-客户端相关参数)
+	<- EurekaInstanceConfigBean [EurekaInstanceConfig] (处理eureka.instance属性-实例有关属性)
+	<- DiscoveryClient (spring的服务发现客户端)
+	<- EurekaRegistration (spring的服务注册)
+	<- ApplicationInfoManager (实例信息)
+	<- EurekaClient [com.netflix.discovery.DiscoveryClient] (*****服务客户端)
+EurekaServerInitializerConfiguration
+	-> ApplicationInfoManager
+	-> EurekaServerConfig
+	-> EurekaClientConfig
+	-> EurekaClient
+	<- EurekaServerConfig (如果没有EurekaServerConfig则默认创建一个)
+	<- EurekaController
+	<- PeerAwareInstanceRegistry
+	<- EurekaServerContext
+	<- EurekaServerBootstrap
+EurekaServerInitializerConfiguration (web容器与Eureka服务的结合)
+	-> EurekaServerConfig
+	-> EurekaServerBootstrap
+	<- EurekaRegistryAvailableEvent
+	<- EurekaServerStartedEvent
+	
+*****com.netflix.discovery.DiscoveryClient
+	com.netflix.discovery.DiscoveryClient.DiscoveryClient(ApplicationInfoManager, EurekaClientConfig, AbstractDiscoveryClientOptionalArgs, Provider<BackupRegistry>)
 ```
 
 ### 最小的配置
