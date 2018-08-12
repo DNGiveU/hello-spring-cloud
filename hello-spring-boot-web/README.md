@@ -35,4 +35,13 @@ org.springframework.boot.context.embedded.EmbeddedWebApplicationContext
 					org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedContext.deferredLoadOnStartup()
 						主要将Tomcat的类加载器设置到线程上下文类加载器中; 注释中也解释了: 一些老的Servlet框架(Struts, BIRT)使用线程上下文类加载器来加载Servlet. (用Tomcat的累加器去加载所有的Servlet, 便于热加载时处理)
 				检查Tomcat中的连接器的启动是否成功; checkThatConnectorsHaveStarted();
+				
+Web容器属性(e.g. Tomcat)设置
+org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizerBeanPostProcessor
+	通过获取SpringIOC中org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer的子类来赋值
+		如: org.springframework.boot.autoconfigure.web.ServerProperties 即可获取application配置文件的server前缀的配置属性
+			org.springframework.boot.autoconfigure.web.ServerProperties.customize(ConfigurableEmbeddedServletContainer) 对EmbededServletContainerFactory进行属性设置以便初始化web容器
+			因为是以BeanPostProcessor方式处理初始化属性. 
+				org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.getEmbeddedServletContainerFactory()
+					return getBeanFactory().getBean(beanNames[0], EmbeddedServletContainerFactory.class); 会过一遍BeanPostProcessor
 ```

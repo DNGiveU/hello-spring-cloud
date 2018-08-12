@@ -36,6 +36,9 @@
 						处理@Import注解
 					org.springframework.context.annotation.ConfigurationClassParser.processImports(ConfigurationClass, SourceClass, Collection<SourceClass>, boolean)
 						先判断类是何种类型(ImportSelector/ImportBeanDefinitionRegistrar/普通类)再根据对应策略处理
+	处理@Bean List<BeanMethod>; org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitionsForBeanMethod(BeanMethod)
+		将注解为@Bean的方法按工厂方法进行处理
+		如果@Bean的name属性为空, 则去方法名; String beanName = (!names.isEmpty() ? names.remove(0) : methodName);
 @SpringBootApplication
 	此注解等价于@Configuration/@EnableAutoConfiguration/@ComponentScan
 	@SpringBootConfiguration 相当于是一个Configuration配置类
