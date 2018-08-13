@@ -1,3 +1,5 @@
+### 服务发现&服务治理
+
 ### @EnableEurekaServer做了什么
 
 ```
@@ -34,7 +36,12 @@ org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration [spring.f
 	<- EurekaRegistration (spring的服务注册)
 	<- ApplicationInfoManager (实例信息)
 	<- EurekaClient [com.netflix.discovery.DiscoveryClient] (*****服务客户端)
-EurekaServerInitializerConfiguration
+EurekaServerInitializerConfiguration (web容器与Eureka服务的结合)
+	-> EurekaServerConfig
+	-> EurekaServerBootstrap
+	<- EurekaRegistryAvailableEvent
+	<- EurekaServerStartedEvent
+EurekaServerConfiguration
 	-> ApplicationInfoManager
 	-> EurekaServerConfig
 	-> EurekaClientConfig
@@ -44,12 +51,11 @@ EurekaServerInitializerConfiguration
 	<- PeerAwareInstanceRegistry
 	<- EurekaServerContext
 	<- EurekaServerBootstrap
-EurekaServerInitializerConfiguration (web容器与Eureka服务的结合)
-	-> EurekaServerConfig
-	-> EurekaServerBootstrap
-	<- EurekaRegistryAvailableEvent
-	<- EurekaServerStartedEvent
-	
+```
+
+### DiscoveryClient
+
+```
 *****com.netflix.discovery.DiscoveryClient
 	com.netflix.discovery.DiscoveryClient.DiscoveryClient(ApplicationInfoManager, EurekaClientConfig, AbstractDiscoveryClientOptionalArgs, Provider<BackupRegistry>)
 ```
