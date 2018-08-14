@@ -5,7 +5,7 @@ server:
   port: 8050
 eureka:
   instance:
-    hostname: localhost
+    hostname: registry
   client:
     # 表明是否将自己注册到其它的注册中心当中以便被发现. true,则根据renewalIntervalInSecs定时发送心跳到注册中心
     register-with-eureka: false
