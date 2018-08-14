@@ -29,19 +29,19 @@
 			主要indicate http unforce encoding. spring.http.encoding.force=false
 			
 配置先后顺序:
-org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration [spring.factories]
+org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration [spring.factories] [客户端配置]
 	<- EurekaClientConfigBean (处理eureka.instance属性-客户端相关参数)
 	<- EurekaInstanceConfigBean [EurekaInstanceConfig] (处理eureka.instance属性-实例有关属性)
 	<- DiscoveryClient (spring的服务发现客户端)
 	<- EurekaRegistration (spring的服务注册)
 	<- ApplicationInfoManager (实例信息)
 	<- EurekaClient [com.netflix.discovery.DiscoveryClient] (*****服务客户端)
-EurekaServerInitializerConfiguration (web容器与Eureka服务的结合)
+EurekaServerInitializerConfiguration (web容器与Eureka服务的结合) [服务端配置]
 	-> EurekaServerConfig
 	-> EurekaServerBootstrap
 	<- EurekaRegistryAvailableEvent
 	<- EurekaServerStartedEvent
-EurekaServerConfiguration
+EurekaServerConfiguration [服务端配置]
 	-> ApplicationInfoManager
 	-> EurekaServerConfig
 	-> EurekaClientConfig
@@ -58,6 +58,25 @@ EurekaServerConfiguration
 ```
 *****com.netflix.discovery.DiscoveryClient
 	com.netflix.discovery.DiscoveryClient.DiscoveryClient(ApplicationInfoManager, EurekaClientConfig, AbstractDiscoveryClientOptionalArgs, Provider<BackupRegistry>)
+```
+
+### EurekaServer
+
+```
+EurekaServerContext Eureka上下文可管理InstanceRegistry/PeerEurekaNodes的生命周期以及获取一些组件ApplicationInfoManager/EurekaServerConfig等等
+|--DefaultEurekaServerContext
+
+EurekaServerBootstrap Eureka服务的一些设置; 如环境变量/注册一些监控指标信息到Servo
+
+InstanceRegistry Eureka的注册实例管理
+|--AbstractInstanceRegistry (Handles all registry requests from eureka clients. Registers/Renewals/Cancels/Expirations/Status Changes)
+	节点注册 com.netflix.eureka.registry.AbstractInstanceRegistry.register(InstanceInfo, int, boolean)
+	节点删除 com.netflix.eureka.registry.AbstractInstanceRegistry.cancel(String, String, boolean)
+	节点更新 com.netflix.eureka.registry.AbstractInstanceRegistry.renew(String, String, boolean)
+|----com.netflix.eureka.registry.PeerAwareInstanceRegistryImpl
+		集群节点同步 com.netflix.eureka.registry.PeerAwareInstanceRegistryImpl.replicateToPeers(Action, String, String, InstanceInfo, InstanceStatus, boolean)
+
+PeerEurekaNodes Eureka实例管理即集群
 ```
 
 ### 最小的配置
