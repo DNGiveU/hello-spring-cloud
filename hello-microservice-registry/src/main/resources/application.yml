@@ -7,12 +7,12 @@ eureka:
   instance:
     hostname: localhost
   client:
-    # 表明是否将自己注册到其它的注册中心当中以便被发现
+    # 表明是否将自己注册到其它的注册中心当中以便被发现. true,则根据renewalIntervalInSecs定时发送心跳到注册中心
     register-with-eureka: false
-    # 表明是否需要从注册中心获取注册信息列表 
+    # 表明是否需要从注册中心获取注册信息列表 . false-可减少一个定义任务. true, 则为根据registryFetchIntervalSeconds参数间隔拉取注册表
     fetch-registry: false
     service-url:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
       
 # 参考文档：http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#_standalone_mode
-# 参考文档：http://my.oschina.net/buwei/blog/618756
+# 源码参考：com.netflix.discovery.DiscoveryClient.initScheduledTasks()

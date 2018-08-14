@@ -75,8 +75,40 @@ InstanceRegistry Eureka的注册实例管理
 	节点更新 com.netflix.eureka.registry.AbstractInstanceRegistry.renew(String, String, boolean)
 |----com.netflix.eureka.registry.PeerAwareInstanceRegistryImpl
 		集群节点同步 com.netflix.eureka.registry.PeerAwareInstanceRegistryImpl.replicateToPeers(Action, String, String, InstanceInfo, InstanceStatus, boolean)
-
 PeerEurekaNodes Eureka实例管理即集群
+
+Eureka集群间信息批量同步
+	com.netflix.eureka.cluster.PeerEurekaNode.PeerEurekaNode(PeerAwareInstanceRegistry, String, String, HttpReplicationClient, EurekaServerConfig, int, long, long, long)
+		可有批量任务和非批量任务之分（都是由一个创建器创建com.netflix.eureka.util.batcher.TaskDispatchers）.		
+		创建一个批量任务调度器 com.netflix.eureka.util.batcher.TaskDispatchers.createBatchingTaskDispatcher(String, int, int, int, long, long, long, TaskProcessor<T>)
+			创建一个接受执行器（接受任务process(ID, T, long)） com.netflix.eureka.util.batcher.AcceptorExecutor.AcceptorExecutor<ID,T>(String, int, int, long, long, long)
+				启动一个名为TaskAcceptor-的线程com.netflix.eureka.util.batcher.AcceptorExecutor.AcceptorRunner.AcceptorRunner()归属为eurekaTaskExecutors线程组 [*****这个线程区分或者说是分配了(批量)任务即任务的划分, 如何为一个批量的*****](maxElementsInPeerReplicationPool确定可以缓存多少个任务)
+					AcceptorRunner线程run() com.netflix.eureka.util.batcher.AcceptorExecutor.AcceptorRunner.run()
+						com.netflix.eureka.util.batcher.AcceptorExecutor.AcceptorRunner.drainInputQueues()
+							处理需要重新处理的任务 com.netflix.eureka.util.batcher.AcceptorExecutor.AcceptorRunner.drainReprocessQueue()
+							处理接受队列 com.netflix.eureka.util.batcher.AcceptorExecutor.AcceptorRunner.drainAcceptorQueue()
+							...
+							添加单个任务(singleItemWorkQueue) com.netflix.eureka.util.batcher.AcceptorExecutor.AcceptorRunner.assignSingleItemWork()
+							添加批量任务(batchWorkQueue) com.netflix.eureka.util.batcher.AcceptorExecutor.AcceptorRunner.assignBatchWork()
+			创建一个批量执行器 com.netflix.eureka.util.batcher.TaskExecutors.batchExecutors(String, int, TaskProcessor<T>, AcceptorExecutor<ID, T>)
+				创建一个名为eurekaTaskExecutors的线程组(数量由maxThreadsForPeerReplication确定)以守护线程方式运行 com.netflix.eureka.util.batcher.TaskExecutors.TaskExecutors(WorkerRunnableFactory<ID, T>, int, AtomicBoolean)
+				线程组中的(TaskBatchingWorker 或者 TaskNonBatchingWorker)线程为 com.netflix.eureka.util.batcher.TaskExecutors.BatchWorkerRunnable.BatchWorkerRunnable<ID,T>(String, AtomicBoolean, TaskExecutorMetrics, TaskProcessor<T>, AcceptorExecutor<ID, T>)
+					线程run com.netflix.eureka.util.batcher.TaskExecutors.BatchWorkerRunnable.run()	
+						获取批量任务(如果没有关闭工作处理并且获取的处理队列为空，则会循环获取) com.netflix.eureka.util.batcher.TaskExecutors.BatchWorkerRunnable.getWork()
+							BlockingQueue<List<TaskHolder<ID, T>>> workQueue = taskDispatcher.requestWorkItems(); [*****requestWorkItems()*****]
+						处理批量任务 com.netflix.eureka.cluster.ReplicationTaskProcessor.process(List<ReplicationTask>)
+							调用请求发送，处理返回结果
+							调用Task的成功回调或者失败回调方法。com.netflix.eureka.cluster.ReplicationTaskProcessor.handleBatchResponse(ReplicationTask, ReplicationInstanceResponse)
+							发送批量请求 com.netflix.eureka.transport.JerseyReplicationClient.submitBatchUpdates(ReplicationList)
+	
+	给AcceptorExecutor处理任务 com.netflix.eureka.util.batcher.AcceptorExecutor.process(ID, T, long)
+		LinkBlockingQueue 来接受任务并使acceptedTasks自增 (任务不断由名为TaskAcceptor-的AcceptorRunner线程来处理)
+		
+Eureka服务对外API (Jersey)
+	com.netflix.eureka.resources.ApplicationsResource (获取)
+	com.netflix.eureka.resources.ApplicationResource (获取、注册)
+		com.netflix.eureka.resources.ApplicationResource.addInstance(InstanceInfo, String)
+	com.netflix.eureka.resources.InstanceResource (更新、删除)
 ```
 
 ### 最小的配置
