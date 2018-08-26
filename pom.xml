@@ -56,5 +56,7 @@
     <module>hello-spring-boot</module>
     <module>hello-spring-boot-web</module>
     <module>hello-microservice-provider-user</module>
+    <module>hello-microservice-consumer-user</module>
+    <module>hello-spring-cloud-api</module>
   </modules>
 </project>
